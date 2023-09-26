@@ -1,6 +1,6 @@
-# pandas
-# streamlit
-# PyPDF2
+pandas
+streamlit
+PyPDF2
 altair==5.1.1
 asttokens==2.4.0
 attrs==23.1.0
