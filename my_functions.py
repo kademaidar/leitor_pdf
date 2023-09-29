@@ -1,5 +1,6 @@
 import pandas as pd
 import PyPDF2
+import io
 import re
 import streamlit as st
 
@@ -147,10 +148,25 @@ def create_answers_df(pdf_answers):
     return df
 
 
-def create_excel(list_pdf_answers):
+def create_sap_excel(list_pdf_answers):
     df = pd.concat(list_pdf_answers, ignore_index=True)
 
-    st.write(df.T)
+    df[
+        [
+            "Empresa",
+            "Ramo",
+            "Numero do Sinistro Seguradora",
+            "Seguradora",
+            "Corretora",
+            "Status Processo (Geral)",
+        ]
+    ] = ["CSPC", "Outros", "Carga Digital Isabelle", "AKAD", "MDS", "PENDENTE"]
+
+    excel_file = io.BytesIO()
+    df.to_excel(excel_file, index=False, sheet_name="Aba_Isa")
+    excel_file.seek(0)
+
+    return excel_file, df
 
 
 # def create_df(answers_list):

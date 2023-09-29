@@ -27,6 +27,8 @@ else:
 
         list_pdf_answers.append(mf.create_answers_df(pdf_answers))
 
-    # st.write(type(list_pdf_answers))
-    mf.create_excel(list_pdf_answers)
-    # st.write(f"ORIGEM: {answer}")
+    excel_sap, df = mf.create_sap_excel(list_pdf_answers)
+
+    st.download_button("Baixar Excel SAP", data=excel_sap, file_name="Excel_Isa.xlsx")
+
+    st.write(df.T)
