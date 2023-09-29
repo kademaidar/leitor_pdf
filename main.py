@@ -15,17 +15,18 @@ else:
 
     st.success(f"Parabens, vc colocou {len(pdfs_list)} arquivos PDF !")
 
+    list_pdf_answers = []
     for pdf_text in pdfs_text_list:
         topic_list = mf.split_into_topics(pdf_text)
 
-        answers_list = []
+        pdf_answers = []
 
-        answers_list.extend(mf.get_topic_3_data(topic_list[3]))
-        answers_list.extend(mf.get_topic_4_data(topic_list[4]))
-        answers_list.extend(mf.get_topic_5_data(topic_list[5]))
+        pdf_answers.extend(mf.get_topic_3_answers(topic_list[3]))
+        pdf_answers.extend(mf.get_topic_4_answers(topic_list[4]))
+        pdf_answers.extend(mf.get_topic_5_answers(topic_list[5]))
 
-        mf.tester(answers_list)
+        list_pdf_answers.append(mf.create_answers_df(pdf_answers))
 
-        # answer = mf.funcao(topic_list)
-
-        # st.write(f"ORIGEM: {answer}")
+    # st.write(type(list_pdf_answers))
+    mf.create_excel(list_pdf_answers)
+    # st.write(f"ORIGEM: {answer}")

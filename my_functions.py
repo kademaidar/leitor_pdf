@@ -5,7 +5,7 @@ import streamlit as st
 
 
 def read_pdfs(pdfs_list):
-    "Lê uma lista de arquivos pdf no formato binario e retorna uma lista de strings com os textos"
+    "Recebe uma lista de arquivos pdf no formato binario e retorna uma lista de strings com os textos"
 
     text_content_list = []
     for pdf_file in pdfs_list:
@@ -44,7 +44,7 @@ def split_into_topics(text_content):
     return topics_list
 
 
-def get_topic_3_data(topic_3):
+def get_topic_3_answers(topic_3):
     "Recebe as linhas do topico '3-EMBARQUE' e retorna uma lista com os valores procurados"
 
     # Search for the ORIGEM answer
@@ -79,7 +79,7 @@ def get_topic_3_data(topic_3):
     return [origem, mercadoria, currency, valor_embarcado, transportadora]
 
 
-def get_topic_4_data(topic_4):
+def get_topic_4_answers(topic_4):
     "Recebe as linhas do topico '4-COMUNICAÇÃO...' e retorna uma lista com os valores procurados"
 
     # Search for the AVISO N answer
@@ -89,12 +89,12 @@ def get_topic_4_data(topic_4):
     if len(topic_4) > 4:
         data_vistoria = topic_4[4]
     else:
-        data_vistoria = "sem resposta"  # ANTENCAO o que colocar nesse caso ?
+        data_vistoria = "(sem resposta)"  # ANTENCAO o que colocar nesse caso ?
 
     return [aviso_n, data_vistoria]
 
 
-def get_topic_5_data(topic_5):
+def get_topic_5_answers(topic_5):
     "Recebe as linhas do topico '5-SINISTRO' e retorna uma lista com os valores procurados"
 
     evento_line = topic_5[2]
@@ -115,8 +115,8 @@ def get_topic_5_data(topic_5):
     return [evento, data, estimativa_prejuizo]
 
 
-def tester(answers_list):
-    "Cria um df com as respostas apenas para conferencia"
+def create_answers_df(pdf_answers):
+    "Cria um df com as respostas de um pdf"
 
     header = [
         "Origem (Unidade)",
@@ -130,21 +130,27 @@ def tester(answers_list):
         "Data da Ocorrencia",
     ]
 
-    # currency_list = [
-    #     "Valor Reclamado (USD)",
-    #     "Valor Reclamado (BRL)",
-    # ]
-
-    if answers_list[2] == "USD":
+    if pdf_answers[2] == "USD":
         header.append("Valor Reclamado (USD)")
-    elif answers_list[2] == "BRL":
+        last_column = "Valor Reclamado (BRL)"
+    elif pdf_answers[2] == "BRL":
         header.append("Valor Reclamado (BRL)")
+        last_column = "Valor Reclamado (USD)"
 
-    df = pd.DataFrame([header, answers_list])
-    st.write(df.T)
+    df = pd.DataFrame([pdf_answers])
+    df.columns = header
+    df[last_column] = ["-"]
+    # df = pd.DataFrame(pdf_answers)
 
-    # st.write(f"Confira os valores:")
     # st.write(df.T)
+
+    return df
+
+
+def create_excel(list_pdf_answers):
+    df = pd.concat(list_pdf_answers, ignore_index=True)
+
+    st.write(df.T)
 
 
 # def create_df(answers_list):
