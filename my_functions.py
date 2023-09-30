@@ -9,17 +9,21 @@ def read_pdfs(pdfs_list):
     "Recebe uma lista de arquivos pdf no formato binario e retorna uma lista de strings com os textos"
 
     text_content_list = []
+    names_list = []
     for pdf_file in pdfs_list:
+        names_list.append(pdf_file.name)
+
         pdf_data = PyPDF2.PdfReader(pdf_file)
         text_content_list.append(pdf_data.pages[0].extract_text())
 
-    return text_content_list
+    return names_list, text_content_list
 
 
 def split_into_topics(text_content):
     "Recebe um pdf, separa cada topico, retorna uma lista com o texto de cada topico"
 
     lines_list = text_content.split("\n")
+
     index_list = []
     topics_list = []
 
@@ -33,8 +37,8 @@ def split_into_topics(text_content):
         "8-SALVADOS",
     ]
 
-    for key in key_words_list:
-        index_list.append(lines_list.index(key))
+    for key_word in key_words_list:
+        index_list.append(lines_list.index(key_word))
 
     for i in range(len(key_words_list)):
         if i < len(key_words_list) - 1:
@@ -117,7 +121,7 @@ def get_topic_5_answers(topic_5):
 
 
 def create_answers_df(pdf_answers):
-    "Cria um df com as respostas de um pdf"
+    "Cria um df com as respostas de um unico pdf"
 
     header = [
         "Origem (Unidade)",
@@ -141,14 +145,22 @@ def create_answers_df(pdf_answers):
     df = pd.DataFrame([pdf_answers])
     df.columns = header
     df[last_column] = ["-"]
-    # df = pd.DataFrame(pdf_answers)
 
-    # st.write(df.T)
+    return df
+
+
+def create_preview(list_pdf_answers, pdfs_names_list):
+    "Junta os df das respostas"
+
+    df = pd.concat(list_pdf_answers, ignore_index=True).T
+    df.columns = pdfs_names_list
 
     return df
 
 
 def create_sap_excel(list_pdf_answers):
+    "Usa o df_preview, adiciona algumas colunas e cria o excel para o SAP"
+
     df = pd.concat(list_pdf_answers, ignore_index=True)
 
     df[
@@ -166,13 +178,13 @@ def create_sap_excel(list_pdf_answers):
     df.to_excel(excel_file, index=False, sheet_name="Aba_Isa")
     excel_file.seek(0)
 
-    return excel_file, df
+    return excel_file
 
 
 # def create_df(answers_list):
 #     "Cria um df com as respostas"
 
-#     header = [
+#     header_excel = [
 #         "Empresa",
 #         "Ramo",
 #         "Apólice",
@@ -248,9 +260,3 @@ def create_sap_excel(list_pdf_answers):
 
 #     # st.write(f"Confira os valores:")
 #     st.write(df.T)
-
-
-# TO DO LIST TOMORROW:
-# Criar uma função que junta todas as listas e já coloca as respostas na ordem em que aparecerão
-# fazer "mercadoria aparecer no lugar certo"
-# if US$ -> USD elif R$ -> BRL

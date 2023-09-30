@@ -8,10 +8,9 @@ pdfs_list = st.file_uploader(
     "Arraste os PDFs", type=["pdf"], accept_multiple_files=True
 )
 
-if len(pdfs_list) == 0:
-    st.warning("Insira seus PDFs")
-else:
-    pdfs_text_list = mf.read_pdfs(pdfs_list)
+
+def run_app(pdfs_list):
+    pdfs_names_list, pdfs_text_list = mf.read_pdfs(pdfs_list)
 
     st.success(f"Parabens, vc colocou {len(pdfs_list)} arquivos PDF !")
 
@@ -27,8 +26,18 @@ else:
 
         list_pdf_answers.append(mf.create_answers_df(pdf_answers))
 
-    excel_sap, df = mf.create_sap_excel(list_pdf_answers)
+    df_preview = mf.create_preview(list_pdf_answers, pdfs_names_list)
+    excel_sap = mf.create_sap_excel(list_pdf_answers)
 
+    st.divider()
     st.download_button("Baixar Excel SAP", data=excel_sap, file_name="Excel_Isa.xlsx")
 
-    st.write(df.T)
+    st.divider()
+    st.header("Prévia:")
+    st.write(df_preview)
+
+
+if len(pdfs_list) == 0:
+    st.warning("Insira seus PDFs")
+else:
+    run_app(pdfs_list)
