@@ -4,8 +4,6 @@ import writer_functions as write
 
 
 def run_app(pdfs_list):
-    st.success(f"Parabens, vc colocou {len(pdfs_list)} arquivos PDF !")
-
     list_pdf_answers = []
     list_pdf_names = []
 
@@ -25,16 +23,29 @@ def run_app(pdfs_list):
 
     df_preview = write.create_preview(list_pdf_names, list_pdf_answers)
     excel_sap = write.create_sap_excel(list_pdf_answers)
+    excel_pbi = write.create_pbi_excel(list_pdf_answers)
 
     st.divider()
-    st.download_button("Baixar Excel SAP", data=excel_sap, file_name="Excel_Isa.xlsx")
+    # fmt: off
+    col1, col2, _, _ = st.columns(4)
+    # fmt: on
+    with col1:
+        st.download_button(
+            "Baixar Excel SAP", data=excel_sap, file_name="excel_SAP_Isa.xlsx"
+        )
+    with col2:
+        st.download_button(
+            "Baixar Excel PowerBI", data=excel_pbi, file_name="excel_PowerBI_Isa.xlsx"
+        )
 
     st.divider()
     st.header("Prévia:")
     st.write(df_preview)
 
 
-st.title("AutoPDF !")
+# Começa a rodar aqui:
+
+st.title("Projeto APAS !")
 
 pdfs_list = st.file_uploader(
     "Arraste os PDFs", type=["pdf"], accept_multiple_files=True
@@ -43,4 +54,5 @@ pdfs_list = st.file_uploader(
 if len(pdfs_list) == 0:
     st.warning("Insira seus PDFs")
 else:
+    st.success(f"Parabens, vc colocou {len(pdfs_list)} arquivos PDF !")
     run_app(pdfs_list)

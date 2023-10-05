@@ -1,5 +1,6 @@
 import PyPDF2
 import re
+import streamlit as st
 
 
 def read_pdf(pdf):
@@ -10,8 +11,6 @@ def read_pdf(pdf):
     pdf_text_page2 = pdf_data.pages[1].extract_text()
 
     pdf_text = pdf_text_page1 + " " + pdf_text_page2
-
-    # st.write(pdf_text)
 
     return pdf.name, pdf_text
 
@@ -61,30 +60,52 @@ def get_topic_3_answers(topic_3):
 
     origem = cities_list[0].strip()  # Remove undesired whitespaces
 
+    # Search for the DESTINO answer
+    destino = cities_list[-1].strip()
+
     # Search for VALOR TOTAL EMBARCADO answer
     mercadoria_line = topic_3[8].replace(".", "")
     money_regex = r"(?:US\$|R\$)\s\d+,\d{2}"
     re_return = re.search(money_regex, mercadoria_line)
     str_valor_embarcado = re_return.group()
 
-    if str_valor_embarcado.split()[0] == "US$":
+    if str_valor_embarcado.split()[0] == "US$":  # Look for currency value
         currency = "USD"
     elif str_valor_embarcado.split()[0] == "R$":
         currency = "BRL"
     else:
         currency = "outro"
 
-    valor_embarcado = float(str_valor_embarcado.split()[1].replace(",", "."))
+    valor_transportado = float(str_valor_embarcado.split()[1].replace(",", "."))
 
     # Search for the MERCADORIA(S) answer
     mercadoria = mercadoria_line[0 : re_return.start()]
 
     # Search for the TRANSPORTADORA answer
     transportadora = topic_3[10]
-    if transportadora == "MOTORISTA":  # Occours when dont have answer
-        transportadora = "-"
+    motorista_index = 12
+    if transportadora == "MOTORISTA":  # Occours when TRANSPORTADORA dont have answer
+        transportadora = " "
+        motorista_index = 11
 
-    return [origem, mercadoria, currency, valor_embarcado, transportadora]
+    # Search for MOTORISTA answer
+    motorista = topic_3[motorista_index]
+
+    # Search for PLACA 1 answer
+    placa_index = motorista_index + 2
+    placa_line = topic_3[placa_index]
+    placa = placa_line[:8].strip()
+
+    return [
+        currency,
+        origem,
+        destino,
+        mercadoria,
+        valor_transportado,
+        transportadora,
+        motorista,
+        placa,
+    ]
 
 
 def get_topic_4_answers(topic_4):
@@ -97,7 +118,7 @@ def get_topic_4_answers(topic_4):
     if len(topic_4) > 4:
         data_vistoria = topic_4[4]
     else:
-        data_vistoria = "(sem resposta)"  # ANTENCAO o que colocar nesse caso ?
+        data_vistoria = " "  # ANTENCAO o que colocar nesse caso ?
 
     return [aviso_n, data_vistoria]
 
@@ -113,7 +134,7 @@ def get_topic_5_answers(topic_5):
     data = re_return.group()
 
     # Search for the EVENTO answer
-    evento = evento_line[0 : re_return.start()]
+    evento = evento_line[0 : re_return.start()].strip()
 
     # Search for the ESTIMATIVA... answer
     estimativa_prejuizo = float(
