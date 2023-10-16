@@ -83,18 +83,25 @@ def get_topic_3_answers(topic_3):
 
     # Search for the TRANSPORTADORA answer
     transportadora = topic_3[10]
-    motorista_index = 12
+    motorista_line_index = 12
     if transportadora == "MOTORISTA":  # Occours when TRANSPORTADORA dont have answer
         transportadora = " "
-        motorista_index = 11
+        motorista_line_index -= 1
 
     # Search for MOTORISTA answer
-    motorista = topic_3[motorista_index]
+    motorista = topic_3[motorista_line_index]
+    if motorista == "PLACA 1 PLACA 2 PLACA 3":
+        motorista = " "
+        motorista_line_index -= 1
 
     # Search for PLACA 1 answer
-    placa_index = motorista_index + 2
-    placa_line = topic_3[placa_index]
-    placa = placa_line[:8].strip()
+    placa_line_index = motorista_line_index + 2
+    placa_line = topic_3[placa_line_index]
+
+    placa = placa_line[:8].replace("-", "").replace(" ", "")
+
+    if placa == "OBSERVAÇ":
+        placa = " "
 
     return [
         currency,
