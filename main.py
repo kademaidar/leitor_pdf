@@ -1,58 +1,41 @@
 import streamlit as st
-import reader_functions as read
-import writer_functions as write
+
+import run_apps as run
 
 
-def run_app(pdfs_list):
-    list_pdf_answers = []
-    list_pdf_names = []
+st.header("Projeto APAS", divider="rainbow")
+st.subheader(
+    ":red[A]utomação no :orange[P]reenchimento e :green[A]nálise de :blue[S]inistros"
+)
+st.subheader("")
 
-    for pdf in pdfs_list:
-        name, pdf_text = read.read_pdf(pdf)
-
-        topic_list = read.split_into_topics(pdf_text)
-
-        pdf_answers = []
-
-        pdf_answers.extend(read.get_topic_3_answers(topic_list[3]))
-        pdf_answers.extend(read.get_topic_4_answers(topic_list[4]))
-        pdf_answers.extend(read.get_topic_5_answers(topic_list[5]))
-
-        list_pdf_names.append(name)
-        list_pdf_answers.append(write.create_answers_df(pdf_answers))
-
-    df_preview = write.create_preview(list_pdf_names, list_pdf_answers)
-    excel_sap = write.create_sap_excel(list_pdf_answers)
-    excel_pbi = write.create_pbi_excel(list_pdf_answers)
-
-    st.divider()
-    # fmt: off
-    col1, col2, _, _ = st.columns(4)
-    # fmt: on
-    with col1:
-        st.download_button(
-            "Baixar Excel SAP", data=excel_sap, file_name="excel_SAP_Isa.xlsx"
-        )
-    with col2:
-        st.download_button(
-            "Baixar Excel PowerBI", data=excel_pbi, file_name="excel_PowerBI_Isa.xlsx"
-        )
-
-    st.divider()
-    st.header("Prévia:")
-    st.write(df_preview)
-
-
-# Começa a rodar aqui:
-
-st.title("Projeto APAS !")
-
-pdfs_list = st.file_uploader(
-    "Arraste os PDFs", type=["pdf"], accept_multiple_files=True
+files_list = st.file_uploader(
+    "Arraste seus arquivos aqui",
+    type=["pdf", "xlsx"],
+    accept_multiple_files=True,
+    help="PDF: Coloque quantas Prévias quiser, cuidado para não repetir\n\nEXCEL: Coloque uma planilha do PowerBI e uma dos Embarques (Atenção para que sejam do mesmo período)",
 )
 
-if len(pdfs_list) == 0:
-    st.warning("Insira seus PDFs")
+extensions_list = [file.name[-1].upper() for file in files_list]
+num_extensions = len(set(extensions_list))
+
+if num_extensions == 0:
+    st.info("Para começar, coloque seus PDFs de Sinistros ou tabelas de Excel")
+elif num_extensions >= 2:
+    st.warning("Não misture tipos de arquivos")
 else:
-    st.success(f"Parabens, vc colocou {len(pdfs_list)} arquivos PDF !")
-    run_app(pdfs_list)
+    if extensions_list[0] == "F":  # Caso seja PDF
+        st.success(f"{len(files_list)} PDFs inseridos !")
+        run.pdf_app(files_list)
+        st.toast("Seus arquivos foram convertidos!")
+    elif extensions_list[0] == "X":  # Caso seja Excel
+        st.success(f"{len(files_list)} arquivos Excel inseridos !")
+        if len(files_list) < 2:
+            st.warning("Insira as duas tabelas necessárias.")
+        elif len(files_list) > 2:
+            st.warning("Insira apenas as duas tabelas necessárias.")
+        else:
+            run.excel_app(files_list)
+            st.toast("Seus arquivos foram convertidos!")
+
+# st.balloons()
